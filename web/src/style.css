@@ -58,6 +58,22 @@ body {
     background-color: #383a44;
 }
 
+#debug-step {
+    display: none;
+}
+
+.toolbar-debug #debug-step {
+    display: block;
+}
+
+.toolbar-debug #share {
+    display: none;
+}
+
+.toolbar-debug #run svg, .toolbar-debug #debug-stop svg, .toolbar-debug #debug-step svg {
+    color: #6eab70;
+}
+
 .editor-layout {
     flex: 1;
     display: flex;

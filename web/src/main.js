@@ -257,6 +257,12 @@ let worker = new SMIWorker();
 
 runBtn.addEventListener("click", () => {
     if (editor.value.length == 0) return;
+
+    if (document.getElementById("toolbar").classList.contains("toolbar-debug")) {
+        debuggerRunUntilBreakpoint();
+        return;
+    }
+
     output.innerHTML = "";
     runBtn.classList.add("hidden");
     stopBtn.classList.remove("hidden");
@@ -345,7 +351,9 @@ const wait = (time) => {
     return promise;
 }
 
-async function debuggerRunUntilBreakpoint() {
+let lastTime = 0;
+
+async function debuggerRunUntilBreakpoint(timeout = 0) {
     while (smiDebugger && smiDebugger.hasNext()) {
         if (smiDebugger.next() !== 0) {
             showError(SMI.getLastErrorData());
@@ -353,29 +361,34 @@ async function debuggerRunUntilBreakpoint() {
             return;
         }
 
-        debuggerShowMemory();
+        if (timeout > 0 || (performance.now() - lastTime > 10)) {
+            debuggerShowMemory();
+        }
 
         if (hasBreakpoint(smiDebugger.getNextLine()))
             break;
 
-        await wait(10);
+        if (timeout > 0 || (performance.now() - lastTime > 10)) {
+            lastTime = performance.now();
+            await wait(timeout);
+        }
     }
 
     if (!smiDebugger)
         return;
+    else
+        debuggerShowMemory();
 
     if (!smiDebugger.hasNext()) {
         document.getElementById("debug-stop").click();
     }
 }
 
-document.getElementById("debug-run").addEventListener("click", () => {
-    debuggerRunUntilBreakpoint();
-});
-
 document.getElementById("debug").addEventListener("click", () => {
-    document.getElementById("toolbar").classList.add("hidden");
-    document.getElementById("debug-toolbar").classList.remove("hidden");
+    document.getElementById("toolbar").classList.add("toolbar-debug");
+    document.getElementById("debug").classList.add("hidden");
+    document.getElementById("debug-stop").classList.remove("hidden");
+    
     editor.readOnly = true;
 
     smiDebugger = SMIDebugger();
@@ -409,8 +422,9 @@ document.getElementById("debug-step").addEventListener("click", () => {
 });
 
 document.getElementById("debug-stop").addEventListener("click", () => {
-    document.getElementById("debug-toolbar").classList.add("hidden");
-    document.getElementById("toolbar").classList.remove("hidden");
+    document.getElementById("toolbar").classList.remove("toolbar-debug");
+    document.getElementById("debug-stop").classList.add("hidden");
+    document.getElementById("debug").classList.remove("hidden");
 
     editorHighlight.classList.add("hidden-after");
 
@@ -506,6 +520,13 @@ document.addEventListener("keydown", (ev) => {
         ev.preventDefault();
 
         document.getElementById("debug-step").click();
+    } else if (ev.key === "F8") {
+        ev.preventDefault();
+
+        if (document.getElementById("debug").classList.contains("hidden"))
+            return;
+
+        document.getElementById("debug").click();
     } else if (ev.key === "F9") {
         ev.preventDefault();
 
