@@ -18,6 +18,16 @@ setTimeout(() => {
 
     if (params.has("d")) {
         setEditorContent(window.atob(params.get("d")));
+    } else if (params.has("b")) {
+        const msFile = Uint8Array.fromBase64(params.get("b").replaceAll("_", "/").replaceAll("-", "+"));
+        
+        const smiDecompiler = SMIDecompiler();
+
+        const code = smiDecompiler.decompile(msFile);
+
+        smiDecompiler.destroy();
+
+        setEditorContent(code, true);
     }
 }, 0);
 
