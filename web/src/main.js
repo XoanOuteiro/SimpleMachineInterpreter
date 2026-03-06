@@ -28,6 +28,8 @@ setTimeout(() => {
         smiDecompiler.destroy();
 
         setEditorContent(code, true);
+    } else {
+        updateLineNumberColumn();
     }
 }, 0);
 
@@ -167,7 +169,7 @@ const colorize = () => {
 
 const updateLineNumberColumn = () => {
     const lines = editor.value.split("\n").length;
-    const currentLines = parseInt(lineNumberColumn.dataset.lines) || 1;
+    const currentLines = parseInt(lineNumberColumn.dataset.lines) || 0;
     
     if (lines == currentLines)
         return;
@@ -187,6 +189,12 @@ const updateLineNumberColumn = () => {
         toggleBreakpoint(parseInt(ev.target.dataset.line));
         ev.target.dataset.breakpoint = (hasBreakpoint(parseInt(ev.target.dataset.line)) ? "true" : "false");
     };
+
+    for (let a = 1; a <= lines; a++) {
+        if (hasBreakpoint(a)) {
+            lineNumberColumn.children[a - 1].dataset.breakpoint = "true";
+        }
+    }
 };
 
 const setEditorContent = (content, updateURL = false) => {
