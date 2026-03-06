@@ -505,6 +505,20 @@ saveFileForm.addEventListener("submit", (ev) => {
     saveFileDialog.classList.add("hidden");
 });
 
+const loadFile = async (file) => {
+    if (file.name.endsWith(".MS")) {
+        const smiDecompiler = SMIDecompiler();
+
+        const code = smiDecompiler.decompile(await file.bytes());
+
+        smiDecompiler.destroy();
+
+        setEditorContent(code, true);
+    } else {
+        setEditorContent(await file.text(), true);
+    }
+};
+
 document.getElementById("open").addEventListener("click", () => {
     const input = document.createElement("input");
     
@@ -517,17 +531,7 @@ document.getElementById("open").addEventListener("click", () => {
         if (!file)
             return;
 
-        if (file.name.endsWith(".MS")) {
-            const smiDecompiler = SMIDecompiler();
-
-            const code = smiDecompiler.decompile(await file.bytes());
-
-            smiDecompiler.destroy();
-
-            setEditorContent(code, true);
-        } else {
-            setEditorContent(await file.text(), true);
-        }
+        loadFile(file);
     }
 
     input.click();
@@ -577,4 +581,32 @@ document.querySelectorAll(".sfd-option").forEach(opt => {
 
         ev.target.classList.add("selected");
     });
+});
+
+document.body.addEventListener("dragover", (ev) => {
+    ev.preventDefault();
+});
+
+document.body.addEventListener("drop", (ev) => {
+    ev.preventDefault();
+    
+    if (ev.dataTransfer.items && ev.dataTransfer.items.length > 0) {
+        const item = ev.dataTransfer.items[0];
+        
+        if (item.kind === "file") {
+            const file = item.getAsFile();
+
+            if (file) {
+                loadFile(file);
+            }
+        }
+
+        ev.dataTransfer.items.clear();
+    } else if (ev.dataTransfer.files && ev.dataTransfer.files.length > 0) {
+        const file = ev.dataTransfer.files[0];
+
+        loadFile(file);
+
+        ev.dataTransfer.clearData();
+    }
 });
