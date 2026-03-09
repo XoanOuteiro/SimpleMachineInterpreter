@@ -14,6 +14,7 @@ namespace smi::interpreter {
 typedef enum {
     INTERPRETER_OK = 0,
     INTERPRETER_ERR_UNDEFINED_LABEL,
+    INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE,
     INTERPRETER_ERR_INVALID_TOKEN,
     INTERPRETER_ERR_UNEXPECTED_TOKEN
 } InterpreterError;
@@ -45,6 +46,12 @@ class Interpreter {
     std::ostringstream buffer;                              \
     buffer << "Undefined label '" << label;                 \
     buffer << "'";                                          \
+    smi::error::setLastError(pos, line, column, label.length(), buffer.str());
+
+#define THROW_INCOMPATIBLE_LABEL_TYPE_EXC(label, pos, line, column) \
+    std::ostringstream buffer;                                      \
+    buffer << "Incompatible label '" << label;                      \
+    buffer << "'";                                                  \
     smi::error::setLastError(pos, line, column, label.length(), buffer.str());
 
 #endif

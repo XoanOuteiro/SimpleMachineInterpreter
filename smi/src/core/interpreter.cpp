@@ -82,7 +82,16 @@ int Interpreter::evalInstruction(Instruction* inst) {
         op2 = static_cast<Identifier*>(inst->getOp2());
         op2_val = op2->getValue();
 
-        if (memory.find(op1_val) == memory.end() || memory.find(op2_val) == memory.end()) {
+        if (memory.find(op1_val) != memory.end() && memory.find(op2_val) != memory.end()) {
+            memory[op2_val] = memory[op1_val];
+        } else if (labels.find(op1_val) != labels.end() && labels.find(op2_val) != labels.end()) {
+            labels[op2_val] = labels[op1_val];
+        } else if (memory.find(op1_val) != memory.end() && labels.find(op2_val) != labels.end() ||
+                   labels.find(op1_val) != labels.end() && memory.find(op2_val) != memory.end()) {
+            THROW_INCOMPATIBLE_LABEL_TYPE_EXC(op2->getValue(), op2->index(), op2->line(), op2->column());
+
+            return INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE;
+        } else {
             const Identifier* opNotFound = (memory.find(op1_val) != memory.end()) ? op2 : op1;
 
             THROW_LABEL_NOT_FOUND_EXC(
@@ -92,8 +101,6 @@ int Interpreter::evalInstruction(Instruction* inst) {
 
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }
-
-        memory[op2_val] = memory[op1_val];
     } else if (inst->getInstr() == "ADD") {
         op2 = static_cast<Identifier*>(inst->getOp2());
         op2_val = op2->getValue();
@@ -114,7 +121,16 @@ int Interpreter::evalInstruction(Instruction* inst) {
         op2 = static_cast<Identifier*>(inst->getOp2());
         op2_val = op2->getValue();
 
-        if (memory.find(op1_val) == memory.end() || memory.find(op2_val) == memory.end()) {
+        if (memory.find(op1_val) != memory.end() && memory.find(op2_val) != memory.end()) {
+            this->cmp = memory[op1_val] == memory[op2_val];
+        } else if (labels.find(op1_val) != labels.end() && labels.find(op2_val) != labels.end()) {
+            this->cmp = labels[op1_val] == labels[op2_val];
+        } else if (memory.find(op1_val) != memory.end() && labels.find(op2_val) != labels.end() ||
+                   labels.find(op1_val) != labels.end() && memory.find(op2_val) != memory.end()) {
+            THROW_INCOMPATIBLE_LABEL_TYPE_EXC(op2->getValue(), op2->index(), op2->line(), op2->column());
+
+            return INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE;
+        } else {
             const Identifier* opNotFound = (memory.find(op1_val) != memory.end()) ? op2 : op1;
 
             THROW_LABEL_NOT_FOUND_EXC(
@@ -124,8 +140,6 @@ int Interpreter::evalInstruction(Instruction* inst) {
 
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }
-
-        this->cmp = memory[op1_val] == memory[op2_val];
     } else if (inst->getInstr() == "BEQ") {
         if (labels.find(op1_val) == labels.end()) {
             THROW_LABEL_NOT_FOUND_EXC(op1_val, op1->index(), op1->line(), op1->column());

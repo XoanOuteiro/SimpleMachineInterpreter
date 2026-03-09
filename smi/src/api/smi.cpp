@@ -20,6 +20,8 @@ int smi_interpreter_eval(SMIInterpreter* interp, const char* code) {
             return SMI_ERR_INVALID_TOKEN;
         case smi::interpreter::INTERPRETER_ERR_UNDEFINED_LABEL:
             return SMI_ERR_UNDEFINED_LABEL;
+        case smi::interpreter::INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE:
+            return SMI_ERR_INCOMPATIBLE_LABEL_TYPE;
         case smi::interpreter::INTERPRETER_ERR_UNEXPECTED_TOKEN:
             return SMI_ERR_UNEXPECTED_TOKEN;
         default:
