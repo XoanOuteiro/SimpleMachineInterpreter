@@ -25,7 +25,8 @@ function SMIInterpreter() {
             Module.ccall("smi_interpreter_memory_keys_free", null, ["number"], [arrayPointer]);
 
             return keys;
-        }
+        },
+        getExecutedInstructions: () => Module.ccall("smi_interpreter_executed_instructions_get", "number", ["number"], [_SMIInterpreter])
     };
 };
 
@@ -71,7 +72,9 @@ function SMIDebugger() {
             Module.ccall("smi_interpreter_memory_keys_free", null, ["number"], [arrayPointer]);
 
             return keys;
-        }
+        },
+        getCmp: () => Module.ccall("smi_debugger_cmp_get", "boolean", ["number"], [_SMIDebugger]),
+        getExecutedInstructions: () => Module.ccall("smi_interpreter_executed_instructions_get", "number", ["number"], [_SMIDebuggerInterp])
     };
 }
 

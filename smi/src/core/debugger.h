@@ -28,6 +28,7 @@ class Debugger : public smi::interpreter::Interpreter {
     int getNextIndex() const;
     int getNextLine() const;
     bool hasNext() const;
+    bool getCmp() const { return this->cmp; }
 };
 
 }  // namespace smi::debugger

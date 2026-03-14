@@ -151,6 +151,8 @@ int Interpreter::evalInstruction(Instruction* inst) {
         }
     }
 
+    this->executedInstructions++;
+
     return INTERPRETER_OK;
 }
 

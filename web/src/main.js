@@ -358,6 +358,11 @@ function debuggerShowMemory() {
         );
     }
 
+    output.insertAdjacentHTML("beforeend", `<div class="row-header"><h4>Register</h4><h4>Value</h4></div>`);
+    output.insertAdjacentHTML("beforeend", `<div class="row"><div>ZF</div><div>${smiDebugger.getCmp() ? 1 : 0}</div></div>`);
+
+    output.insertAdjacentHTML("beforeend", `<div class="row-executed-instructions">Total executed instructions: ${smiDebugger.getExecutedInstructions()}</div>`);
+
     editorHighlight.style.setProperty("--debugger-line-pos", `${smiDebugger.getNextLine() - 1}lh`);
 }
 
@@ -376,7 +381,7 @@ async function debuggerRunUntilBreakpoint(timeout = 0) {
         if (smiDebugger.next() !== 0) {
             showError(SMI.getLastErrorData());
             
-            return;
+            break;
         }
 
         if (timeout > 0 || (performance.now() - lastTime > 10)) {

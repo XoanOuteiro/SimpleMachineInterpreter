@@ -223,6 +223,27 @@ body {
     text-align: center;
 }
 
+.output .row + .row-header {
+    margin-top: 40px;
+}
+
+.output .row-header {
+    display: flex;
+    padding: 10px 0px;
+}
+
+.output .row-header * {
+    flex: 1;
+    text-align: center;
+}
+
+.output .row-executed-instructions {
+    color: #18ac18;
+    background-color: #282828;
+    padding: 20px;
+    margin-top: 40px;
+}
+
 h3, h4 {
     margin: 0;
     padding: 10px;

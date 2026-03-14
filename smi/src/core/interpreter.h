@@ -24,10 +24,11 @@ class Interpreter {
     std::vector<std::string> memory_keys;
     std::unordered_map<std::string, uint16_t> memory;
     std::unordered_map<std::string, uint16_t> labels;
-    bool cmp;
+    int executedInstructions;
 
    protected:
     int pc;
+    bool cmp;
 
     int eval(Node* node);
     void evalLabel(Label* ls);
@@ -35,9 +36,12 @@ class Interpreter {
     void evalAssignment(Assignment* as);
 
    public:
+    Interpreter() : executedInstructions(0) {}
+
     int eval(const std::string& code);
     const std::vector<std::string>& getMemoryKeys();
     uint16_t getMemoryValue(std::string key);
+    int getExecutedInstructions() const { return this->executedInstructions; };
 };
 
 }  // namespace smi::interpreter

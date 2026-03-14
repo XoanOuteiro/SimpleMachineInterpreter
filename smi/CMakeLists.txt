@@ -33,6 +33,7 @@ set(EXPORTED_FUNCTIONS
     "_smi_interpreter_memory_keys_get"
     "_smi_interpreter_memory_keys_free"
     "_smi_interpreter_memory_value_get"
+    "_smi_interpreter_executed_instructions_get"
     "_smi_last_error_data_get"
 
     "_smi_debugger_new"
@@ -42,6 +43,7 @@ set(EXPORTED_FUNCTIONS
     "_smi_debugger_next_index_get"
     "_smi_debugger_next_line_get"
     "_smi_debugger_has_next"
+    "_smi_debugger_cmp_get"
     "_smi_debugger_as_interpreter"
     
     "_smi_msdecompiler_new"

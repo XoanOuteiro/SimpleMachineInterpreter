@@ -18,6 +18,7 @@ int smi_interpreter_eval(SMIInterpreter* interp, const char* code);
 const char** smi_interpreter_memory_keys_get(SMIInterpreter* interp);
 void smi_interpreter_memory_keys_free(const char** keys);
 uint16_t smi_interpreter_memory_value_get(SMIInterpreter* interp, const char* key);
+int smi_interpreter_executed_instructions_get(SMIInterpreter* interp);
 
 void smi_last_error_data_get(SMIErrorData* error);
 
@@ -28,6 +29,7 @@ int smi_debugger_next(SMIDebugger* debugger);
 int smi_debugger_next_index_get(SMIDebugger* debugger);
 int smi_debugger_next_line_get(SMIDebugger* debugger);
 bool smi_debugger_has_next(SMIDebugger* debugger);
+bool smi_debugger_cmp_get(SMIDebugger* debugger);
 SMIInterpreter* smi_debugger_as_interpreter(SMIDebugger* debugger);
 
 SMIMSDecompiler* smi_msdecompiler_new();

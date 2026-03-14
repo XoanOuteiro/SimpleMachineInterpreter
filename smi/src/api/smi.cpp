@@ -60,6 +60,10 @@ uint16_t smi_interpreter_memory_value_get(SMIInterpreter* interp, const char* ke
     return cast(interp)->getMemoryValue(key);
 }
 
+int smi_interpreter_executed_instructions_get(SMIInterpreter* interp) {
+    return cast(interp)->getExecutedInstructions();
+}
+
 void smi_last_error_data_get(SMIErrorData* error) {
     const smi::error::ErrorData& _error = smi::error::getLastError();
 
@@ -96,6 +100,10 @@ int smi_debugger_next_line_get(SMIDebugger* debugger) {
 
 bool smi_debugger_has_next(SMIDebugger* debugger) {
     return cast(debugger)->hasNext();
+}
+
+bool smi_debugger_cmp_get(SMIDebugger* debugger) {
+    return cast(debugger)->getCmp();
 }
 
 SMIInterpreter* smi_debugger_as_interpreter(SMIDebugger* debugger) {
