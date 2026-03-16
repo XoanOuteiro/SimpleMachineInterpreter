@@ -95,6 +95,8 @@ const LABEL_RE = /\b([A-Z0-9a-z]+)\b:/gd;
 const COMMENT_RE = /(;[^\n]*)/gd;
 const NEWLINE_RE = /(\n)/gd;
 const COLORIZE_RE = new RegExp(`(?:\\b(${INSTRUCTIONS.join("|")})\\b|\\b([A-Z0-9a-z]+)\\b:|(;[^\\n]*)|(\\n))`, "gd");
+const escapeHTML = (s) => s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"',
+  "&quot;");
 
 const colorize = () => {
     const code = editor.value;
@@ -151,18 +153,18 @@ const colorize = () => {
         if (tk.start < lastIndex)
             continue;
 
-        codeResult += `<span>${code.substring(lastIndex, tk.start)}</span>`;
+        codeResult += `<span>${escapeHTML(code.substring(lastIndex, tk.start))}</span>`;
 
         if (tk.type === "newline") {
             codeResult += `</div><div class="editor-line">`;
         } else {
-            codeResult += `<span class="${tk.type}">${code.substring(tk.start, tk.end)}</span>`;
+            codeResult += `<span class="${tk.type}">${escapeHTML(code.substring(tk.start, tk.end))}</span>`;
         }
 
         lastIndex = tk.end;
     }
 
-    codeResult += `<span>${code.substring(lastIndex)}</span></div>`;
+    codeResult += `<span>${escapeHTML(code.substring(lastIndex))}</span></div>`;
 
     editorHighlight.innerHTML = codeResult;
 }
