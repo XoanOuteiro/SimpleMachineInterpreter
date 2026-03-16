@@ -24,8 +24,6 @@ int Interpreter::eval(const std::string& code) {
         return INTERPRETER_ERR_INVALID_TOKEN;
     }
 
-    std::unique_ptr<Program> program;
-
     if (parser::parse(tokens, program) != parser::PARSER_OK) {
         return INTERPRETER_ERR_UNEXPECTED_TOKEN;
     }
@@ -82,22 +80,21 @@ int Interpreter::evalInstruction(Instruction* inst) {
         op2 = static_cast<Identifier*>(inst->getOp2());
         op2_val = op2->getValue();
 
-        if (memory.find(op1_val) != memory.end() && memory.find(op2_val) != memory.end()) {
+        if (isMemoryLabel(op1_val) && isMemoryLabel(op2_val)) {
             memory[op2_val] = memory[op1_val];
-        } else if (labels.find(op1_val) != labels.end() && labels.find(op2_val) != labels.end()) {
-            labels[op2_val] = labels[op1_val];
-        } else if (memory.find(op1_val) != memory.end() && labels.find(op2_val) != labels.end() ||
-                   labels.find(op1_val) != labels.end() && memory.find(op2_val) != memory.end()) {
+        } else if (isCodeLabel(op1_val) && isCodeLabel(op2_val)) {
+            delete program->getBody()[labels[op2_val] + 1];
+            program->getBody()[labels[op2_val] + 1] = program->getBody()[labels[op1_val] + 1]->clone();
+
+        } else if (isMemoryLabel(op1_val) && isCodeLabel(op2_val) || isCodeLabel(op1_val) && isMemoryLabel(op2_val)) {
             THROW_INCOMPATIBLE_LABEL_TYPE_EXC(op2->getValue(), op2->index(), op2->line(), op2->column());
 
             return INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE;
         } else {
-            const Identifier* opNotFound = (memory.find(op1_val) != memory.end()) ? op2 : op1;
+            const Identifier* opNotFound = isMemoryLabel(op1_val) ? op2 : op1;
 
-            THROW_LABEL_NOT_FOUND_EXC(
-                opNotFound->getValue(), opNotFound->index(), opNotFound->line(), opNotFound->column()
-
-            );
+            THROW_LABEL_NOT_FOUND_EXC(opNotFound->getValue(), opNotFound->index(), opNotFound->line(),
+                                      opNotFound->column());
 
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }
@@ -105,13 +102,11 @@ int Interpreter::evalInstruction(Instruction* inst) {
         op2 = static_cast<Identifier*>(inst->getOp2());
         op2_val = op2->getValue();
 
-        if (memory.find(op1_val) == memory.end() || memory.find(op2_val) == memory.end()) {
-            const Identifier* opNotFound = (memory.find(op1_val) != memory.end()) ? op2 : op1;
+        if (!isMemoryLabel(op1_val) || !isMemoryLabel(op2_val)) {
+            const Identifier* opNotFound = isMemoryLabel(op1_val) ? op2 : op1;
 
-            THROW_LABEL_NOT_FOUND_EXC(
-                opNotFound->getValue(), opNotFound->index(), opNotFound->line(), opNotFound->column()
-
-            );
+            THROW_LABEL_NOT_FOUND_EXC(opNotFound->getValue(), opNotFound->index(), opNotFound->line(),
+                                      opNotFound->column());
 
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }
@@ -121,27 +116,24 @@ int Interpreter::evalInstruction(Instruction* inst) {
         op2 = static_cast<Identifier*>(inst->getOp2());
         op2_val = op2->getValue();
 
-        if (memory.find(op1_val) != memory.end() && memory.find(op2_val) != memory.end()) {
+        if (isMemoryLabel(op1_val) && isMemoryLabel(op2_val)) {
             this->cmp = memory[op1_val] == memory[op2_val];
-        } else if (labels.find(op1_val) != labels.end() && labels.find(op2_val) != labels.end()) {
-            this->cmp = labels[op1_val] == labels[op2_val];
-        } else if (memory.find(op1_val) != memory.end() && labels.find(op2_val) != labels.end() ||
-                   labels.find(op1_val) != labels.end() && memory.find(op2_val) != memory.end()) {
+        } else if (isCodeLabel(op1_val) && isCodeLabel(op2_val)) {
+            this->cmp = *program->getBody()[labels[op2_val] + 1] == *program->getBody()[labels[op1_val] + 1];
+        } else if (isMemoryLabel(op1_val) && isCodeLabel(op2_val) || isCodeLabel(op1_val) && isMemoryLabel(op2_val)) {
             THROW_INCOMPATIBLE_LABEL_TYPE_EXC(op2->getValue(), op2->index(), op2->line(), op2->column());
 
             return INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE;
         } else {
-            const Identifier* opNotFound = (memory.find(op1_val) != memory.end()) ? op2 : op1;
+            const Identifier* opNotFound = isMemoryLabel(op1_val) ? op2 : op1;
 
-            THROW_LABEL_NOT_FOUND_EXC(
-                opNotFound->getValue(), opNotFound->index(), opNotFound->line(), opNotFound->column()
-
-            );
+            THROW_LABEL_NOT_FOUND_EXC(opNotFound->getValue(), opNotFound->index(), opNotFound->line(),
+                                      opNotFound->column());
 
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }
     } else if (inst->getInstr() == "BEQ") {
-        if (labels.find(op1_val) == labels.end()) {
+        if (!isCodeLabel(op1_val)) {
             THROW_LABEL_NOT_FOUND_EXC(op1_val, op1->index(), op1->line(), op1->column());
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }

@@ -2,6 +2,7 @@
 #define _INTERPRETER_H_
 
 #include <cstdint>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -27,6 +28,7 @@ class Interpreter {
     int executedInstructions;
 
    protected:
+    std::unique_ptr<Program> program;
     int pc;
     bool cmp;
 
@@ -34,6 +36,9 @@ class Interpreter {
     void evalLabel(Label* ls);
     int evalInstruction(Instruction* inst);
     void evalAssignment(Assignment* as);
+
+    bool isMemoryLabel(const std::string& label) { return memory.find(label) != memory.end(); }
+    bool isCodeLabel(const std::string& label) { return labels.find(label) != labels.end(); }
 
    public:
     Interpreter() : executedInstructions(0) {}
