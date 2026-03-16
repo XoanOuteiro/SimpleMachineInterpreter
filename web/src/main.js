@@ -42,7 +42,7 @@ CSS.highlights.set("error", highlights["ERROR"]);
 const normalize = () => {
     const selStart = editor.selectionStart;
 
-    const matches = editor.value.matchAll(new RegExp(`\\b(${INSTRUCTIONS.join("|")})\\b`, "gdi"));
+    const matches = editor.value.matchAll(new RegExp(`^[^;\\n]*\\b(${INSTRUCTIONS.join("|")})\\b`, "mgdi"));
 
     for (const m of matches) {
         if (m[1] !== m[1].toUpperCase()) {
@@ -51,7 +51,7 @@ const normalize = () => {
     }
 
     for (const m of editor.value.matchAll(/\b([A-Z0-9a-z]+)\b:/gd)) {
-        for (const ml of editor.value.matchAll(new RegExp(`\\b(${m[1]})\\b([^:]|$)`, "gdi"))) {
+        for (const ml of editor.value.matchAll(new RegExp(`^[^;\\n]*\\b(${m[1]})\\b([^:]|$)`, "mgdi"))) {
             if (ml[1] !== m[1]) {
                 editor.setRangeText(m[1], ml.indices[1][0], ml.indices[1][1], "end");
             }
