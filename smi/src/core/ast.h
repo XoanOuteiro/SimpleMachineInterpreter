@@ -89,7 +89,10 @@ class Instruction : public Node {
     Node* getOp1() const { return m_op1; }
     Node* getOp2() const { return m_op2; }
 
-    Node* clone() const { return new Instruction(m_instr, m_op1->clone(), m_op2->clone(), index(), line(), column()); }
+    Node* clone() const {
+        return new Instruction(m_instr, m_op1 ? m_op1->clone() : nullptr, m_op2 ? m_op2->clone() : nullptr, index(),
+                               line(), column());
+    }
 
     bool operator==(const Node& other) {
         if (!other.typeMatch(NodeType::INSTR)) return false;
