@@ -107,6 +107,12 @@ int Interpreter::evalInstruction(Instruction* inst) {
         if (!isMemoryLabel(op1_val) || !isMemoryLabel(op2_val)) {
             const Identifier* opNotFound = isMemoryLabel(op1_val) ? op2 : op1;
 
+            if (isCodeLabel(op1_val) || isCodeLabel(op2_val)) {
+                THROW_INCOMPATIBLE_LABEL_TYPE_EXC(opNotFound->getValue(), opNotFound->index(), opNotFound->line(),
+                                                  opNotFound->column());
+                return INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE;
+            }
+
             THROW_LABEL_NOT_FOUND_EXC(opNotFound->getValue(), opNotFound->index(), opNotFound->line(),
                                       opNotFound->column());
 
@@ -136,6 +142,11 @@ int Interpreter::evalInstruction(Instruction* inst) {
         }
     } else if (inst->getInstr() == "BEQ") {
         if (!isCodeLabel(op1_val)) {
+            if (isMemoryLabel(op1_val)) {
+                THROW_INCOMPATIBLE_LABEL_TYPE_EXC(op1_val, op1->index(), op1->line(), op1->column());
+                return INTERPRETER_ERR_INCOMPATIBLE_LABEL_TYPE;
+            }
+
             THROW_LABEL_NOT_FOUND_EXC(op1_val, op1->index(), op1->line(), op1->column());
             return INTERPRETER_ERR_UNDEFINED_LABEL;
         }
