@@ -95,6 +95,7 @@ const LABEL_RE = /\b([A-Z0-9a-z]+)\b:/gd;
 const COMMENT_RE = /(;[^\n]*)/gd;
 const NEWLINE_RE = /(\n)/gd;
 const COLORIZE_RE = new RegExp(`(?:\\b(${INSTRUCTIONS.join("|")})\\b|\\b([A-Z0-9a-z]+)\\b:|(;[^\\n]*)|(\\n))`, "gd");
+const LABEL_LINE_RE = /^[ \t]*([a-zA-Z0-9]+):\s*?$/;
 
 const colorize = () => {
     const code = editor.value;
@@ -185,6 +186,19 @@ const updateLineNumberColumn = () => {
     lineNumberColumn.onclick = (ev) => {
         if (ev.target.tagName !== "SPAN")
             return;
+
+        if (LABEL_LINE_RE.test(editor.value.split("\n")[parseInt(ev.target.dataset.line) - 1])) {
+            const lineNodes = lineNumberColumn.querySelectorAll("span[data-line]");
+
+            if (parseInt(ev.target.dataset.line) >= lineNodes.length)
+                return;
+            
+            toggleBreakpoint(parseInt(ev.target.dataset.line) + 1);
+
+            lineNodes[parseInt(ev.target.dataset.line)].dataset.breakpoint = (hasBreakpoint(parseInt(ev.target.dataset.line) + 1) ? "true" : "false");
+
+            return;
+        }
 
         toggleBreakpoint(parseInt(ev.target.dataset.line));
         ev.target.dataset.breakpoint = (hasBreakpoint(parseInt(ev.target.dataset.line)) ? "true" : "false");
