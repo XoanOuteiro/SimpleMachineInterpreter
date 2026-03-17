@@ -83,9 +83,11 @@ int Interpreter::evalInstruction(Instruction* inst) {
         if (isMemoryLabel(op1_val) && isMemoryLabel(op2_val)) {
             memory[op2_val] = memory[op1_val];
         } else if (isCodeLabel(op1_val) && isCodeLabel(op2_val)) {
-            delete program->getBody()[labels[op2_val] + 1];
-            program->getBody()[labels[op2_val] + 1] = program->getBody()[labels[op1_val] + 1]->clone();
+            Node* newNode = program->getBody()[labels[op1_val] + 1]->clone();
 
+            delete program->getBody()[labels[op2_val] + 1];
+
+            program->getBody()[labels[op2_val] + 1] = newNode;
         } else if (isMemoryLabel(op1_val) && isCodeLabel(op2_val) || isCodeLabel(op1_val) && isMemoryLabel(op2_val)) {
             THROW_INCOMPATIBLE_LABEL_TYPE_EXC(op2->getValue(), op2->index(), op2->line(), op2->column());
 
