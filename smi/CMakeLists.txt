@@ -72,6 +72,15 @@ if (NOT EMSCRIPTEN)
         set_property(TARGET smi PROPERTY CXX_STANDARD 20)
     endif()
 
+    if (MSVC)
+        set_property(TARGET smi PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
+    else()
+        target_link_options(smi PRIVATE
+            -static-libgcc
+            -static-libstdc++
+        )
+    endif()
+
     install(TARGETS smi RUNTIME DESTINATION bin)
 else()
     add_executable(smiwasmout "src/api/smi.cpp" "src/api/smi_cast.cpp" ${LIBSMI_SOURCES})

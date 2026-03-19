@@ -95,6 +95,7 @@ const LABEL_RE = /\b([A-Z0-9a-z]+)\b:/gd;
 const COMMENT_RE = /(;[^\n]*)/gd;
 const NEWLINE_RE = /(\n)/gd;
 const COLORIZE_RE = new RegExp(`(?:\\b(${INSTRUCTIONS.join("|")})\\b|\\b([A-Z0-9a-z]+)\\b:|(;[^\\n]*)|(\\n))`, "gd");
+const LABEL_LINE_RE = /^[ \t]*([a-zA-Z0-9]+):\s*?$/;
 const escapeHTML = (s) => s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"',
   "&quot;");
 
@@ -187,6 +188,19 @@ const updateLineNumberColumn = () => {
     lineNumberColumn.onclick = (ev) => {
         if (ev.target.tagName !== "SPAN")
             return;
+
+        if (LABEL_LINE_RE.test(editor.value.split("\n")[parseInt(ev.target.dataset.line) - 1])) {
+            const lineNodes = lineNumberColumn.querySelectorAll("span[data-line]");
+
+            if (parseInt(ev.target.dataset.line) >= lineNodes.length)
+                return;
+            
+            toggleBreakpoint(parseInt(ev.target.dataset.line) + 1);
+
+            lineNodes[parseInt(ev.target.dataset.line)].dataset.breakpoint = (hasBreakpoint(parseInt(ev.target.dataset.line) + 1) ? "true" : "false");
+
+            return;
+        }
 
         toggleBreakpoint(parseInt(ev.target.dataset.line));
         ev.target.dataset.breakpoint = (hasBreakpoint(parseInt(ev.target.dataset.line)) ? "true" : "false");
@@ -326,6 +340,7 @@ stopBtn.addEventListener("click", () => {
 });
 
 let smiDebugger = null;
+let currentLine = -1;
 const breakpoints = new Set();
 
 function addBreakpoint(line) {
@@ -360,8 +375,12 @@ function debuggerShowMemory() {
         );
     }
 
+    const line = currentLine !== -1 ? editor.value.split("\n")[currentLine - 1] : "NA";
+
     output.insertAdjacentHTML("beforeend", `<div class="row-header"><h4>Register</h4><h4>Value</h4></div>`);
     output.insertAdjacentHTML("beforeend", `<div class="row"><div>ZF</div><div>${smiDebugger.getCmp() ? 1 : 0}</div></div>`);
+    output.insertAdjacentHTML("beforeend", `<div class="row"><div>PC</div><div>${smiDebugger.getNextLine()}</div></div>`);
+    output.insertAdjacentHTML("beforeend", `<div class="row"><div>IR</div><div>${line}</div></div>`);
 
     output.insertAdjacentHTML("beforeend", `<div class="row-executed-instructions">Total executed instructions: ${smiDebugger.getExecutedInstructions()}</div>`);
 
@@ -380,6 +399,8 @@ let lastTime = 0;
 
 async function debuggerRunUntilBreakpoint(timeout = 0) {
     while (smiDebugger && smiDebugger.hasNext()) {
+        currentLine = smiDebugger.getNextLine();
+
         if (smiDebugger.next() !== 0) {
             showError(SMI.getLastErrorData());
             
@@ -417,6 +438,7 @@ document.getElementById("debug").addEventListener("click", () => {
     editor.readOnly = true;
 
     smiDebugger = SMIDebugger();
+    currentLine = -1;
     
     if (smiDebugger.load(editor.value) !== 0) {
         showError(SMI.getLastErrorData());
@@ -432,6 +454,8 @@ document.getElementById("debug").addEventListener("click", () => {
 document.getElementById("debug-step").addEventListener("click", () => {
     if (!smiDebugger || !smiDebugger.hasNext())
         return;
+
+    currentLine = smiDebugger.getNextLine();
     
     if (smiDebugger.next() !== 0) {
         showError(SMI.getLastErrorData());

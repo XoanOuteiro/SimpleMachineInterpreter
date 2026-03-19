@@ -18,8 +18,6 @@ typedef enum {
 
 class Debugger : public smi::interpreter::Interpreter {
    private:
-    std::unique_ptr<Program> program;
-
     void advance();
 
    public:

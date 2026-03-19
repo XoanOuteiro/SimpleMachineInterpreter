@@ -31,6 +31,10 @@ class Node {
     int line() const { return m_line; }
     int column() const { return m_column; }
 
+    virtual Node* clone() const { return nullptr; }
+    virtual bool operator==(const Node& other) { return false; }
+    bool operator!=(const Node& other) { return !(*this == other); }
+
     virtual ~Node() {
         // std::cout << "Destroyed node of type " << (int)m_type << std::endl;
     }
@@ -63,6 +67,12 @@ class Label : public Node {
 
     std::string getName() const { return m_name; }
 
+    Node* clone() const { return new Label(m_name, index(), line(), column()); }
+
+    bool operator==(const Node& other) {
+        return other.typeMatch(NodeType::LABEL) && static_cast<const Label*>(&other)->m_name == m_name;
+    }
+
     ~Label() = default;
 };
 
@@ -78,6 +88,25 @@ class Instruction : public Node {
     std::string getInstr() const { return m_instr; }
     Node* getOp1() const { return m_op1; }
     Node* getOp2() const { return m_op2; }
+
+    Node* clone() const {
+        return new Instruction(m_instr, m_op1 ? m_op1->clone() : nullptr, m_op2 ? m_op2->clone() : nullptr, index(),
+                               line(), column());
+    }
+
+    bool operator==(const Node& other) {
+        if (!other.typeMatch(NodeType::INSTR)) return false;
+
+        const Instruction* inst = static_cast<const Instruction*>(&other);
+
+        if (inst->m_instr != m_instr) return false;
+
+        if (*inst->m_op1 != *m_op1) return false;
+
+        if (*inst->m_op2 != *m_op2) return false;
+
+        return true;
+    }
 
     ~Instruction() {
         delete m_op1;
@@ -95,6 +124,12 @@ class Identifier : public Node {
 
     std::string getValue() const { return m_value; }
 
+    Node* clone() const { return new Identifier(m_value, index(), line(), column()); }
+
+    bool operator==(const Node& other) {
+        return other.typeMatch(NodeType::IDENTIFIER) && static_cast<const Identifier*>(&other)->m_value == m_value;
+    }
+
     ~Identifier() = default;
 };
 
@@ -109,6 +144,13 @@ class Assignment : public Node {
 
     std::string getName() { return m_name; }
     std::string getValue() { return m_value; }
+
+    Node* clone() const { return new Assignment(m_name, m_value, index(), line(), column()); }
+
+    bool operator==(const Node& other) {
+        return other.typeMatch(NodeType::ASSIGN) && static_cast<const Assignment*>(&other)->m_name == m_name &&
+               static_cast<const Assignment*>(&other)->m_value == m_value;
+    }
 
     ~Assignment() = default;
 };
